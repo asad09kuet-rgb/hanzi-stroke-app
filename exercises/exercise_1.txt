@@ -9,15 +9,15 @@
 是、什么、认识、高兴、也
 
 # Exercise 1 · Lesson 1-3 · Dialogues
-老师，你好！
-马丁，你好！
-我是韩国人。
-我是日本人。
-早上好！
-老师，您好！
-请问您贵姓？
-我姓李。
-我叫马丁。
-我是美国人。
-认识你很高兴！
-我也很高兴！
+老师，你好！ | Hello, teacher!
+马丁，你好！ | Hello, Martin!
+我是韩国人。 | I am Korean.
+我是日本人。 | I am Japanese.
+早上好！ | Good morning!
+老师，您好！ | Hello, teacher! (polite)
+请问您贵姓？ | May I ask your surname?
+我姓李。 | My surname is Li.
+我叫马丁。 | My name is Martin.
+我是美国人。 | I am American.
+认识你很高兴！ | Nice to meet you!
+我也很高兴！ | Nice to meet you too!

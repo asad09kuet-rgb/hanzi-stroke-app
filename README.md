@@ -9,6 +9,7 @@ When the app opens it asks which mode to use:
 
 The **Change mode** button at the top goes back to the choice.
 
+- **English meanings**: the clicked character's meaning sits above the drawing box, with the meaning of the word it belongs to (e.g. 高兴 happy). Mode 1 shows a short meaning under every character. Mode 2 shows the English translation under each sentence; untick *Show English* to test yourself.
 - **Stroke order animation** with a numbered stroke sequence underneath.
 - **Sound**: says the character (e.g. nǐ) and each stroke's name as it is drawn (héng, shù, piě…). Each can be switched off. Stroke names are worked out automatically from the stroke shape, so a few may be off.
 - **Practice mode**: draw the character yourself with the mouse or a finger; it corrects wrong strokes.
@@ -36,11 +37,14 @@ Put a `.txt` file in the `exercises/` folder (UTF-8). One file can hold several 
 
 ```text
 # Exercise 4 · Lesson 6 · Dialogues
-你今天去哪儿？
-我去图书馆。
+你今天去哪儿？ | Where are you going today?
+我去图书馆。 | I'm going to the library.
 ```
 
+The English after `|` is optional and shown under the sentence.
+
 - A line starting with `#` starts a new exercise and gives it a title.
+- Character meanings come from the bundled dictionary automatically. Short class-friendly meanings for the class characters are in `data/glosses.json`; add a line there to override one.
 - Sentences are split at `。！？；` and at line breaks. Character lists like `家、有、口` stay on one line.
 - You can also upload a `.txt` file or paste text in the app's sidebar for a quick try without changing the repo.
 
@@ -52,3 +56,4 @@ Put a `.txt` file in the `exercises/` folder (UTF-8). One file can hold several 
 - Speech uses the browser's built-in text-to-speech. Chrome and Edge include a Chinese voice; on other browsers you may need to install one.
 
 Stroke data © Make Me a Hanzi / Arphic (Arphic Public License), via `hanzi-writer-data`.
+Dictionary: [CC-CEDICT](https://cc-cedict.org) (CC BY-SA 4.0), in `data/cedict.json.gz`.

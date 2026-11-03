@@ -99,6 +99,19 @@ select { border: 1px solid var(--line); background: var(--sheet); border-radius:
 .fan .k { font-size: .62rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
 .warn { font-size: .8rem; color: var(--ink-soft); text-align: center; margin-top: 8px; }
 
+/* Meanings */
+.mean { display: grid; gap: 4px; margin-top: 10px; padding: 10px 12px; background: var(--accent-soft); border-radius: 8px; min-height: 2.4em; }
+.mean[hidden] { display: none !important; }
+.mean .m1 { font-size: .98rem; }
+.mean .m1 b { font-family: var(--f-han); font-size: 1.1rem; margin-right: 6px; }
+.mean .m1 .p { color: var(--accent); margin-right: 6px; font-weight: 600; }
+.mean .m2 { font-size: .86rem; color: var(--ink-soft); }
+.mean .m2 b { font-family: var(--f-han); color: var(--ink); font-weight: 600; }
+.en { margin: -6px 0 16px; font-size: 1.05rem; color: var(--ink-soft); font-style: italic; min-height: 1.5em; }
+.toggle { display: inline-flex; align-items: center; gap: 6px; font-size: .88rem; color: var(--ink-soft); cursor: pointer; }
+.toggle input { accent-color: var(--accent); }
+.ch .gl { font-size: .68rem; color: var(--ink-soft); line-height: 1.15; max-width: 76px; text-align: center; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; min-height: 2.3em; }
+
 /* Mode picker */
 .modes { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
 .mode { text-align: left; border: 1px solid var(--line); background: var(--sheet); border-radius: var(--r); padding: 22px; cursor: pointer; display: grid; gap: 10px; align-content: start; }
@@ -114,7 +127,7 @@ select { border: 1px solid var(--line); background: var(--sheet); border-radius:
 .cgroup .letter { font-weight: 700; color: var(--accent); font-size: 1.1rem; padding-top: 10px; text-transform: uppercase; }
 .cgrid { display: flex; flex-wrap: wrap; gap: 4px; }
 .cgrid .ch .hz { font-size: 2.1rem; }
-.cgrid .ch { min-width: 56px; }
+.cgrid .ch { width: 82px; align-content: start; }
 
 /* Exercise editor */
 details.editor { background: var(--sheet); border: 1px solid var(--line); border-radius: var(--r); }
@@ -158,6 +171,7 @@ textarea { width: 100%; min-height: 180px; border: 1px solid var(--line); border
     <section class="page" id="charsPage" aria-label="All characters" hidden>
       <div class="toolbar">
         <select id="exSel1" aria-label="Exercise"></select>
+        <label class="toggle"><input type="checkbox" id="showGl" checked> Show meanings</label>
         <span class="counter" id="counter1"></span>
       </div>
       <div class="cgroups" id="cgroups"></div>
@@ -166,9 +180,11 @@ textarea { width: 100%; min-height: 180px; border: 1px solid var(--line); border
     <section class="page" id="sentPage" aria-label="Exercise sentence">
       <div class="toolbar">
         <select id="exSel" aria-label="Exercise"></select>
+        <label class="toggle"><input type="checkbox" id="showEn" checked> Show English</label>
         <span class="counter" id="counter"></span>
       </div>
       <div class="sentence" id="sentence"></div>
+      <p class="en" id="sentEn"></p>
       <div class="nav">
         <button class="btn" id="prev">← Previous</button>
         <div class="dots" id="dots"></div>
@@ -181,6 +197,7 @@ textarea { width: 100%; min-height: 180px; border: 1px solid var(--line); border
         <span class="label">Stroke order</span>
         <span class="meta" id="meta"></span>
       </div>
+      <div class="mean" id="mean" hidden></div>
       <div class="tian" id="tian">
         <svg class="grid" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
           <line x1="0" y1="50" x2="100" y2="50" vector-effect="non-scaling-stroke"/>
@@ -232,6 +249,7 @@ const store = {
 /* ---------- Exercises (sent from the Streamlit app) ---------- */
 const EXERCISES = __EXERCISES_JSON__;
 const START_EX = __START_EX__;
+const CHARS = __CHARS_JSON__; // character → {g: short class gloss, d: [[pinyin, English], ...] from CC-CEDICT}
 
 /* ---------- Character data: bundled chunks served by Streamlit, CDN as fallback ---------- */
 const chunkCache = new Map();
@@ -398,6 +416,32 @@ function tick() {
   } catch {}
 }
 
+/* ---------- Meanings ---------- */
+const flat = p => (p || '').toLowerCase().replace(/\s+/g, '');
+function meaningOf(ch, py) {
+  const list = (CHARS[ch] && CHARS[ch].d) || [];
+  return list.find(e => flat(e[0]) === flat(py)) || list.find(e => flat(e[0]).normalize('NFD').replace(/[\u0300-\u036f]/g, '') === flat(py).normalize('NFD').replace(/[\u0300-\u036f]/g, '')) || list[0] || null;
+}
+function shortOf(ch, py) {
+  if (CHARS[ch] && CHARS[ch].g) return CHARS[ch].g;
+  const m = meaningOf(ch, py); return m ? glossOf(m[1]) : '';
+}
+function glossOf(def) {
+  if (!def) return '';
+  let g = def.split(';')[0].replace(/\s*\([^)]*\)\s*/g, ' ').trim() || def.split(';')[0];
+  return g;
+}
+function showMeaning(ch, py, word) {
+  const m = meaningOf(ch, py), g = CHARS[ch] && CHARS[ch].g;
+  const box = $('mean');
+  if (!m && !g && !word) { box.hidden = true; return; }
+  box.hidden = false;
+  let html = `<span class="m1"><b>${ch}</b><span class="p">${escapeHtml(py || (m ? m[0] : ''))}</span>${escapeHtml(g || (m ? m[1] : ''))}</span>`;
+  if (g && m) html += `<span class="m2">Dictionary: ${escapeHtml(m[1])}</span>`;
+  if (word) html += `<span class="m2">In the word <b>${escapeHtml(word.text)}</b> ${escapeHtml(word.py)}: ${escapeHtml(word.def)}</span>`;
+  box.innerHTML = html;
+}
+
 /* ---------- State ---------- */
 let exercises = EXERCISES;
 let exIdx = Math.min(START_EX, exercises.length - 1), sIdx = 0, current = null, writer = null, strokes = [], names = [], stepAt = 0, runId = 0;
@@ -423,12 +467,17 @@ function pinyinArr(s) {
 function renderSentence() {
   const ex = exercises[exIdx], s = ex.sentences[sIdx];
   const chars = [...s], py = pinyinArr(s);
+  const words = (ex.words && ex.words[sIdx]) || [];
+  const wordAt = i => { const w = words.find(w => i >= w[0] && i < w[0] + w[1]); return w ? { text: chars.slice(w[0], w[0] + w[1]).join(''), py: w[2], def: w[3] } : null; };
+  $('sentEn').textContent = (ex.en && ex.en[sIdx]) || '';
+  $('sentEn').hidden = !$('showEn').checked || !$('sentEn').textContent;
   const box = $('sentence'); box.innerHTML = '';
   chars.forEach((c, i) => {
     if (isHan(c)) {
       const b = document.createElement('button');
       b.className = 'ch' + (seen.has(c) ? ' done' : '') + (current === c ? ' on' : '');
-      b.dataset.ch = c; b.dataset.i = i;
+      b.dataset.ch = c; b.dataset.i = i; b._word = wordAt(i);
+      const gl = shortOf(c, py[i]); if (gl) b.title = `${c} ${py[i] || ''}: ${gl}`;
       b.innerHTML = `<span class="py">${escapeHtml(py[i] || '')}</span><span class="hz">${c}</span>`;
       b.setAttribute('aria-label', `${c} ${py[i] || ''}`);
       b.onclick = () => { selectChar(c, b); if (innerWidth < 860) $('tian').scrollIntoView({ behavior: 'smooth', block: 'center' }); };
@@ -443,6 +492,7 @@ function renderSentence() {
   $('dots').innerHTML = ex.sentences.map((_, i) => `<button class="${i === sIdx ? 'on' : ''}" data-i="${i}" aria-label="Sentence ${i + 1}"></button>`).join('');
   store.set(KEY + ':pos', `${exIdx},${sIdx}`);
 }
+$('showEn').onchange = () => { $('sentEn').hidden = !$('showEn').checked || !$('sentEn').textContent; };
 $('dots').onclick = e => { const i = e.target.dataset.i; if (i != null) { sIdx = +i; renderSentence(); } };
 function go(delta) {
   const ex = exercises[exIdx];
@@ -468,7 +518,7 @@ function makeWriter(ch) {
   });
 }
 
-async function selectChar(ch, btn) {
+async function selectChar(ch, btn, silent = false) {
   document.querySelectorAll('.ch.on').forEach(b => b.classList.remove('on'));
   if (btn) btn.classList.add('on');
   current = ch; runId++; stepAt = 0;
@@ -476,6 +526,7 @@ async function selectChar(ch, btn) {
   makeWriter(ch);
   const py = btn ? btn.querySelector('.py').textContent : '';
   $('meta').innerHTML = `<span class="big">${ch}</span> ${escapeHtml(py)}`;
+  showMeaning(ch, py, btn && btn._word);
   setNow('', '');
   ['play', 'step', 'say', 'quiz'].forEach(id => $(id).disabled = false);
   let data;
@@ -484,7 +535,7 @@ async function selectChar(ch, btn) {
   strokes = data.strokes; names = data.medians.map(classify);
   $('meta').innerHTML = `<span class="big">${ch}</span> ${escapeHtml(py)} · ${strokes.length} strokes`;
   renderFan(-1);
-  return play();
+  return play(silent);
 }
 
 function setNow(name, sub) {
@@ -507,31 +558,32 @@ $('fan').onclick = e => {
 };
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-async function doStep(id) {
+async function doStep(id, silent = false) {
   if (!writer || stepAt >= strokes.length) return false;
   const i = stepAt++;
   renderFan(i);
   setNow(names[i], `Stroke ${i + 1} of ${strokes.length} · ${enOf(names[i])}`);
   if ($('optTick').checked) tick();
-  const speech = $('optName').checked ? say(names[i], 1) : Promise.resolve();
+  const speak = !silent && $('optName').checked;
+  const speech = speak ? say(names[i], 1) : Promise.resolve();
   await writer.animateStroke(i);
-  if ($('optName').checked) await Promise.race([speech, sleep(900)]);
+  if (speak) await Promise.race([speech, sleep(900)]);
   return id === runId;
 }
-async function play() {
+async function play(silent = false) {
   if (!writer) return;
   const id = ++runId; stepAt = 0;
   await writer.hideCharacter({ duration: 0 });
   if (writer._quiz) writer.cancelQuiz();
-  if ($('optChar').checked) { await say(current, 0.75); if (id !== runId) return; }
+  if (!silent && $('optChar').checked) { await say(current, 0.75); if (id !== runId) return; }
   while (stepAt < strokes.length) {
-    const ok = await doStep(id);
+    const ok = await doStep(id, silent);
     if (id !== runId || !ok) return;
     await sleep(Math.max(80, 350 / +$('optSpeed').value));
   }
   if (id === runId) { seen.add(current); document.querySelectorAll(`.ch[data-ch="${current}"]`).forEach(b => b.classList.add('done')); setNow('', ''); renderFan(-1); $('now').innerHTML = `<span class="n1">Done · ${strokes.length} strokes</span><span class="n2">Press Practice to try writing it yourself</span>`; }
 }
-$('play').onclick = play;
+$('play').onclick = () => play();
 $('step').onclick = async () => {
   if (!writer) return;
   if (stepAt >= strokes.length || stepAt === 0) { runId++; stepAt = 0; await writer.hideCharacter({ duration: 0 }); }
@@ -604,14 +656,17 @@ function renderChars() {
       const b = document.createElement('button');
       b.className = 'ch' + (seen.has(it.ch) ? ' done' : '') + (current === it.ch ? ' on' : '');
       b.dataset.ch = it.ch;
-      b.innerHTML = `<span class="py">${escapeHtml(it.py)}</span><span class="hz">${it.ch}</span>`;
-      b.setAttribute('aria-label', `${it.ch} ${it.py}`);
+      const gl = shortOf(it.ch, it.py);
+      b.innerHTML = `<span class="py">${escapeHtml(it.py)}</span><span class="hz">${it.ch}</span><span class="gl"${$('showGl').checked ? '' : ' hidden'}>${escapeHtml(gl)}</span>`;
+      if (gl) b.title = `${it.ch} ${it.py}: ${gl}`;
+      b.setAttribute('aria-label', `${it.ch} ${it.py} ${gl}`);
       b.onclick = () => { selectChar(it.ch, b); if (innerWidth < 860) $('tian').scrollIntoView({ behavior: 'smooth', block: 'center' }); };
       grid.appendChild(b);
     }
     box.appendChild(g);
   }
 }
+$('showGl').onchange = () => document.querySelectorAll('.cgrid .gl').forEach(g => g.hidden = !$('showGl').checked);
 $('exSel1').onchange = e => { ex1 = +e.target.value; renderChars(); };
 
 /* ---------- Mode switching ---------- */
@@ -619,9 +674,7 @@ let mode = null;
 function openFirst(container) {
   const first = container.querySelector('.ch');
   if (!first) return;
-  const optC = $('optChar').checked, optN = $('optName').checked;
-  $('optChar').checked = false; $('optName').checked = false;
-  selectChar(first.dataset.ch, first).finally(() => { $('optChar').checked = optC; $('optName').checked = optN; });
+  selectChar(first.dataset.ch, first, true); // first character plays without sound
 }
 function setMode(m) {
   mode = m;

@@ -1,4 +1,5 @@
 """Hanzi Stroke Studio: show class exercises sentence by sentence and draw each character's stroke order."""
+import gzip
 import json
 import re
 from pathlib import Path
@@ -48,10 +49,60 @@ def parse(text: str, default_title: str) -> list[dict]:
             cur["lines"].append(line)
     result = []
     for ex in exercises:
-        sentences = [s for ln in ex["lines"] for s in split_sentences(ln)]
+        sentences, english = [], []
+        for ln in ex["lines"]:
+            # "中文句子 | English translation" — the part after | is optional.
+            zh, _, en = ln.partition("|")
+            for sent in split_sentences(zh.strip()):
+                sentences.append(sent)
+                english.append(en.strip())
         if sentences:
-            result.append({"title": ex["title"], "sentences": sentences})
+            result.append({"title": ex["title"], "sentences": sentences, "en": english})
     return result
+
+
+# ---------- Dictionary (CC-CEDICT) ----------
+@st.cache_resource
+def load_dict() -> dict:
+    with gzip.open(ROOT / "data" / "cedict.json.gz", "rt", encoding="utf-8") as fh:
+        return json.load(fh)
+
+
+REF = re.compile(r"(?:[^\s|\[\]]+\|)?([^\s|\[\]]+)\[[^\]]+\]")
+
+
+def tidy(text: str) -> str:
+    """Turn CEDICT cross-references like 德國|德国[De2 guo2] into 德国."""
+    return REF.sub(r"\1", text)
+
+
+def find_words(sentence: str, words: dict) -> list[list]:
+    """Greedy longest match of dictionary words (2-5 characters)."""
+    out, i = [], 0
+    while i < len(sentence):
+        for n in range(5, 1, -1):
+            w = sentence[i : i + n]
+            if len(w) == n and w in words:
+                out.append([i, n, words[w][0], tidy(words[w][1])])
+                i += n
+                break
+        else:
+            i += 1
+    return out
+
+
+def add_meanings(exercises: list[dict]) -> dict:
+    """Returns {char: {"g": short class gloss, "d": [[pinyin, dictionary meaning], ...]}}."""
+    d = load_dict()
+    glosses = json.loads((ROOT / "data" / "glosses.json").read_text(encoding="utf-8"))
+    chars = {}
+    for ex in exercises:
+        ex["words"] = [find_words(s, d["w"]) for s in ex["sentences"]]
+        for s in ex["sentences"]:
+            for c in s:
+                if HAN.match(c) and c not in chars and (c in d["c"] or c in glosses):
+                    chars[c] = {"g": glosses.get(c, ""), "d": [[py, tidy(df)] for py, df in d["c"].get(c, [])]}
+    return chars
 
 
 def read_text(data: bytes) -> str:
@@ -90,11 +141,14 @@ with st.sidebar:
             "- One `.txt` file can hold several exercises.\n"
             "- Start each with a line like `# Lesson 3`.\n"
             "- Sentences are split at `。！？；` and line breaks.\n"
+            "- Add an English translation after `|`, e.g. `你好！ | Hello!`\n"
             "- Put files in the repo's `exercises/` folder to keep them permanently."
         )
 
+char_meanings = add_meanings(exercises)
 html = (
     TEMPLATE.replace("__EXERCISES_JSON__", json.dumps(exercises, ensure_ascii=False))
+    .replace("__CHARS_JSON__", json.dumps(char_meanings, ensure_ascii=False))
     .replace("__START_EX__", str(int(start)))
     # Relative to the app's URL, so it also works under Streamlit Cloud's path prefix.
     .replace("__STATIC__", "app/static")

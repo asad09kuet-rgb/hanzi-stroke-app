@@ -6,30 +6,37 @@
 工作、律师、医生
 
 # Exercise 3 · Lesson 5 · Dialogues
-你家有几口人？
-我家有四口人。爸爸、妈妈、哥哥和我。
-你爸爸做什么工作？妈妈呢？
-我爸爸是律师，妈妈是医生。
-你哥哥做什么工作？
-他不工作，他和我都是大学生。
-你们学习什么？
-我们学习汉语。
-你们班有多少学生？
-二十五个。
-你们班有法国人吗？
-有。
-有几个法国人？
-两个。
+你家有几口人？ | How many people are in your family?
+我家有四口人。 | There are four people in my family.
+爸爸、妈妈、哥哥和我。 | Dad, Mum, my older brother and me.
+你爸爸做什么工作？妈妈呢？ | What does your dad do? And your mum?
+我爸爸是律师，妈妈是医生。 | My dad is a lawyer and my mum is a doctor.
+你哥哥做什么工作？ | What does your older brother do?
+他不工作，他和我都是大学生。 | He doesn't work; he and I are both university students.
+你们学习什么？ | What do you study?
+我们学习汉语。 | We study Chinese.
+你们班有多少学生？ | How many students are in your class?
+二十五个。 | Twenty-five.
+你们班有法国人吗？ | Are there any French people in your class?
+有。 | Yes, there are.
+有几个法国人？ | How many French people?
+两个。 | Two.
 
 # Exercise 3 · Lesson 5 · Fill in the blanks
-我们都学习汉语。
-我的爸爸妈妈都是医生。
-他家有五口人。
-北航有多少留学生？
-我有两个哥哥和一个妹妹。
-我们班有两个日本人。
-我爸爸在北京工作，我哥哥也在北京工作。
-你有几个哥哥？
+我们都学习汉语。 | We all study Chinese.
+我的爸爸妈妈都是医生。 | My dad and mum are both doctors.
+他家有五口人。 | There are five people in his family.
+北航有多少留学生？ | How many overseas students does Beihang have?
+我有两个哥哥和一个妹妹。 | I have two older brothers and a younger sister.
+我们班有两个日本人。 | There are two Japanese people in our class.
+我爸爸在北京工作，我哥哥也在北京工作。 | My dad works in Beijing, and my older brother also works in Beijing.
+你有几个哥哥？ | How many older brothers do you have?
 
 # Exercise 3 · Lesson 5 · Introduce your family
-我叫阿萨德。我家有五口人：爸爸、妈妈、姐姐、哥哥和我。我爸爸是商人，我妈妈是老师。我姐姐是学生。我哥哥也是老师。我是北航的研究生，我的专业是管理。我在北京学习汉语。
+我叫阿萨德。 | My name is Asad.
+我家有五口人：爸爸、妈妈、姐姐、哥哥和我。 | There are five people in my family: Dad, Mum, my older sister, my older brother and me.
+我爸爸是商人，我妈妈是老师。 | My dad is a businessman and my mum is a teacher.
+我姐姐是学生。 | My older sister is a student.
+我哥哥也是老师。 | My older brother is also a teacher.
+我是北航的研究生，我的专业是管理。 | I am a master's student at Beihang, and my major is management.
+我在北京学习汉语。 | I study Chinese in Beijing.
