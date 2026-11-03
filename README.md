@@ -16,6 +16,8 @@ The **Change mode** button at the top goes back to the choice.
 
 ## Run it locally
 
+Install [Python 3.9+](https://www.python.org/downloads/), then double-click `run_windows.bat` (Windows) or run `./run_mac_linux.sh` (Mac/Linux). The app opens at http://localhost:8501. Or by hand:
+
 ```bash
 pip install -r requirements.txt
 streamlit run app.py
