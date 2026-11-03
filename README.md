@@ -1,6 +1,13 @@
 # Hanzi Stroke Studio
 
-A Streamlit app for practising the characters from class exercises. It shows each exercise one sentence at a time, with pinyin above every character. Click a character and the box on the right draws it stroke by stroke in a 田字格 grid.
+A Streamlit app for practising the characters from class exercises. Click a character and the box on the right draws it stroke by stroke in a 田字格 grid.
+
+When the app opens it asks which mode to use:
+
+- **Mode 1 · All characters**: every character from the exercises once, sorted A to Z by pinyin and grouped by first letter. Choose all exercises or one.
+- **Mode 2 · Sentence by sentence**: each exercise one sentence at a time, with pinyin above every character.
+
+The **Change mode** button at the top goes back to the choice.
 
 - **Stroke order animation** with a numbered stroke sequence underneath.
 - **Sound**: says the character (e.g. nǐ) and each stroke's name as it is drawn (héng, shù, piě…). Each can be switched off. Stroke names are worked out automatically from the stroke shape, so a few may be off.

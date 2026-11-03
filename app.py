@@ -82,7 +82,7 @@ with st.sidebar:
         st.stop()
 
     titles = [f"{e['title']} ({len(e['sentences'])} sentences)" for e in exercises]
-    start = st.selectbox("Start with", range(len(exercises)), format_func=lambda i: titles[i])
+    start = st.selectbox("Start with (sentence mode)", range(len(exercises)), format_func=lambda i: titles[i])
     height = st.slider("Box height", 700, 1600, 1000, 20, help="Make this taller on a phone, where the two panels stack.")
 
     with st.expander("File format"):
