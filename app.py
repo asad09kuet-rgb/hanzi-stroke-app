@@ -6,6 +6,9 @@ from pathlib import Path
 
 import streamlit as st
 import streamlit.components.v1 as components
+from pypinyin import pinyin as _pinyin
+
+import assistant
 
 ROOT = Path(__file__).parent
 EXERCISE_DIR = ROOT / "exercises"
@@ -154,3 +157,13 @@ html = (
     .replace("__STATIC__", "app/static")
 )
 components.html(html, height=height, scrolling=True)
+
+
+# ---------- Class assistant (RAG over the exercises) ----------
+@st.cache_data(show_spinner=False)
+def _docs(exercises_json: str, chars_json: str) -> list[dict]:
+    pinyin_of = lambda s: " ".join(x[0] for x in _pinyin(s) if x and x[0].strip())
+    return assistant.build_docs(ROOT, json.loads(exercises_json), json.loads(chars_json), pinyin_of)
+
+
+assistant.render(_docs(json.dumps(exercises, ensure_ascii=False), json.dumps(char_meanings, ensure_ascii=False)))

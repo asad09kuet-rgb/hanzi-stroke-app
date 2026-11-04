@@ -1,0 +1,19 @@
+# Grammar and usage notes from the class exercise answer sheets. One note per line.
+不 changes tone to bú before a 4th-tone syllable, e.g. 不是 bú shì.
+一 is read yì in 一起 (yìqǐ) and before 百 (一百 yìbǎi); it is read yí before a 4th tone, e.g. 一个 yí ge.
+两 (liǎng), not 二 (èr), is used before a measure word: 两个, 两百 (liǎngbǎi, also èrbǎi).
+Use 几 (jǐ) for small numbers you expect to be under 10, e.g. 你家有几口人？ Use 多少 (duōshao) for any number, especially larger ones, e.g. 你们班有多少学生？
+口 is the measure word for family members: 我家有四口人 (there are four people in my family).
+个 (ge) is the general measure word: 两个哥哥, 一个妹妹, 二十五个学生.
+吗 (ma) turns a statement into a yes/no question: 你是留学生吗？
+呢 (ne) asks "and you?" about the same topic: 我学习汉语。你呢？
+也 (yě, also/too) goes before the verb: 我也学习汉语。 我哥哥也是老师。
+都 (dōu, all/both) goes before the verb, after the people it covers: 我们都学习汉语。 他和我都是大学生。
+在 (zài) + place + verb says where an action happens: 我在北京学习汉语。 我爸爸在北京工作。
+的 (de) shows possession: 我的爸爸, 你们的汉语老师. With close family it can be dropped: 我爸爸.
+请问您贵姓？ is the polite way to ask someone's surname; answer with 我姓…: 我姓李。 To give your full name use 我叫…: 我叫马丁。
+您 (nín) is the polite form of 你 (nǐ), used for teachers and older people: 老师，您好！
+做什么工作？ asks what job someone does: 你爸爸做什么工作？ Answer with 是 + job: 我爸爸是律师。
+Numbers: 十二 shí'èr (12), 二十 èrshí (20), 九十七 jiǔshíqī (97), 一百 yìbǎi (100), 一百零一 yìbǎi líng yī (101), 一百一十 yìbǎi yīshí (110), 两百 liǎngbǎi (200).
+Nationality = country + 人: 中国人, 美国人, 日本人, 韩国人, 法国人.
+Language = country/people + 语: 汉语 (Chinese), 法语 (French).

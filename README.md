@@ -15,6 +15,19 @@ The **Change mode** button at the top goes back to the choice.
 - **Practice mode**: draw the character yourself with the mouse or a finger; it corrects wrong strokes.
 - **Keyboard**: ← → change sentence, Space replays.
 
+## Class assistant (AI)
+
+Below the practice area is a chat box. Ask anything about your exercises, for example *What does 都 mean?*, *What's the difference between 几 and 多少?* or *How do I ask someone's surname politely?*
+
+It uses retrieval-augmented generation (RAG): for each question, `assistant.py` searches a knowledge base built from the exercises (every sentence with pinyin and English, every character with meanings and stroke count, dictionary words, and the grammar notes in `data/class_notes.txt`), and sends only the best matches to Claude. Each answer has a **Class material used** section showing what it was based on.
+
+It needs an Anthropic API key (from console.anthropic.com):
+
+- **Streamlit Cloud:** app menu **⋮ → Settings → Secrets**, add `ANTHROPIC_API_KEY = "sk-ant-..."`.
+- **Locally:** create `.streamlit/secrets.toml` with the same line (it's git-ignored).
+
+Without a key the rest of the app works as usual. Each question costs a fraction of a cent.
+
 ## Run it locally
 
 Install [Python 3.9+](https://www.python.org/downloads/), then double-click `run_windows.bat` (Windows) or run `./run_mac_linux.sh` (Mac/Linux). The app opens at http://localhost:8501. Or by hand:
