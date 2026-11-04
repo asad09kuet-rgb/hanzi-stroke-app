@@ -2,8 +2,10 @@
 留、学、生、她、习、们、起、课
 说、汉、语、吗、不、中、谁、同
 
+
 # Exercise 2 · Lesson 4 · Words
 中国、汉语、一起、说、上课、学习
+
 
 # Exercise 2 · Lesson 4 · Paragraph
 他叫马丁。 | His name is Martin.
@@ -24,7 +26,7 @@
 我们的汉语老师是张老师。 | Our Chinese teacher is Teacher Zhang.
 
 # Exercise 2 · Lesson 4 · Make sentences
-我在中国学习汉语。 | I study Chinese in China.
+我学习汉语。 | I study Chinese.
 我们一起上课。 | We go to class together.
 你是中国人吗？ | Are you Chinese?
 我不是老师。 | I am not a teacher.
