@@ -540,7 +540,9 @@ async function selectChar(ch, btn, silent = false) {
   strokes = data.strokes; names = data.medians.map(classify);
   $('meta').innerHTML = `<span class="big">${ch}</span> ${escapeHtml(py)} · ${strokes.length} strokes`;
   renderFan(-1);
-  return play(silent, true);
+  // Picking a character only shows it; drawing starts when ▶ Play strokes is pressed.
+  $('now').innerHTML = `<span class="n1">${strokes.length} strokes</span><span class="n2">Press ▶ Play strokes to draw it</span>`;
+  if (!silent && $('optChar').checked) say(current, 0.75);
 }
 
 function setNow(name, sub) {
