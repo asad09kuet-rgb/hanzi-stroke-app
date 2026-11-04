@@ -578,6 +578,11 @@ function setPaused(on) {
 }
 function resetPause() { setPaused(false); }
 async function waitWhilePaused() { while (paused) await sleep(100); }
+async function pausableSleep(ms, id) {
+  // Like sleep, but the clock stops while paused and it ends early if a new run starts.
+  let left = ms;
+  while (left > 0 && id === runId) { await sleep(50); if (!paused) left -= 50; }
+}
 $('pause').onclick = () => setPaused(!paused);
 
 async function doStep(id, silent = false) {
@@ -587,9 +592,12 @@ async function doStep(id, silent = false) {
   setNow(names[i], `Stroke ${i + 1} of ${strokes.length} · ${enOf(names[i])}`);
   if ($('optTick').checked) tick();
   const speak = !silent && $('optName').checked;
-  const speech = speak ? say(names[i], 1) : Promise.resolve();
+  if (speak) {
+    say(names[i], 1);
+    await pausableSleep(1000, id); // the stroke name starts 1 second before the stroke is drawn
+    if (id !== runId) return false;
+  }
   await writer.animateStroke(i);
-  if (speak) await Promise.race([speech, sleep(900)]);
   return id === runId;
 }
 async function play(silent = false) {
