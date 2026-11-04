@@ -211,6 +211,7 @@ textarea { width: 100%; min-height: 180px; border: 1px solid var(--line); border
       <div class="now" id="now"><span class="n1">&nbsp;</span><span class="n2">&nbsp;</span></div>
       <div class="controls">
         <button class="btn primary" id="play" disabled>▶ Play strokes</button>
+        <button class="btn" id="pause" disabled>⏸ Pause</button>
         <button class="btn" id="step" disabled>Next stroke</button>
         <button class="btn" id="say" disabled>🔊 Say it</button>
         <button class="btn" id="quiz" disabled>✍ Practice</button>
@@ -519,9 +520,10 @@ function makeWriter(ch) {
 }
 
 async function selectChar(ch, btn, silent = false) {
+  resetPause();
   document.querySelectorAll('.ch.on').forEach(b => b.classList.remove('on'));
   if (btn) btn.classList.add('on');
-  current = ch; runId++; stepAt = 0;
+  current = ch; runId++; stepAt = 0; playing = false; updatePauseBtn();
   $('empty').hidden = true;
   makeWriter(ch);
   const py = btn ? btn.querySelector('.py').textContent : '';
@@ -558,6 +560,26 @@ $('fan').onclick = e => {
 };
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/* ---------- Pause / resume ---------- */
+let paused = false, playing = false;
+function updatePauseBtn() {
+  const b = $('pause');
+  b.disabled = !playing;
+  b.textContent = paused ? '⏵ Resume' : '⏸ Pause';
+  b.classList.toggle('primary', paused);
+}
+function setPaused(on) {
+  if (on === paused) return;
+  paused = on;
+  try { on ? writer && writer.pauseAnimation() : writer && writer.resumeAnimation(); } catch {}
+  try { on ? speechSynthesis.pause() : speechSynthesis.resume(); } catch {}
+  updatePauseBtn();
+}
+function resetPause() { setPaused(false); }
+async function waitWhilePaused() { while (paused) await sleep(100); }
+$('pause').onclick = () => setPaused(!paused);
+
 async function doStep(id, silent = false) {
   if (!writer || stepAt >= strokes.length) return false;
   const i = stepAt++;
@@ -572,26 +594,35 @@ async function doStep(id, silent = false) {
 }
 async function play(silent = false) {
   if (!writer) return;
+  resetPause();
   const id = ++runId; stepAt = 0;
+  playing = true; updatePauseBtn();
+  try { await runStrokes(id, silent); }
+  finally { if (id === runId) { playing = false; resetPause(); updatePauseBtn(); } }
+}
+async function runStrokes(id, silent) {
   await writer.hideCharacter({ duration: 0 });
   if (writer._quiz) writer.cancelQuiz();
   if (!silent && $('optChar').checked) { await say(current, 0.75); if (id !== runId) return; }
   while (stepAt < strokes.length) {
+    await waitWhilePaused(); if (id !== runId) return;
     const ok = await doStep(id, silent);
     if (id !== runId || !ok) return;
     await sleep(Math.max(80, 350 / +$('optSpeed').value));
+    await waitWhilePaused(); if (id !== runId) return;
   }
   if (id === runId) { seen.add(current); document.querySelectorAll(`.ch[data-ch="${current}"]`).forEach(b => b.classList.add('done')); setNow('', ''); renderFan(-1); $('now').innerHTML = `<span class="n1">Done · ${strokes.length} strokes</span><span class="n2">Press Practice to try writing it yourself</span>`; }
 }
 $('play').onclick = () => play();
 $('step').onclick = async () => {
   if (!writer) return;
+  if (playing) { runId++; playing = false; resetPause(); }
   if (stepAt >= strokes.length || stepAt === 0) { runId++; stepAt = 0; await writer.hideCharacter({ duration: 0 }); }
   doStep(runId);
 };
 $('say').onclick = () => current && say(current, 0.75);
 $('quiz').onclick = async () => {
-  if (!writer) return; runId++;
+  if (!writer) return; runId++; playing = false; resetPause();
   setNow('', '');
   $('now').innerHTML = '<span class="n1">Your turn</span><span class="n2">Draw each stroke in order inside the box</span>';
   renderFan(-1);
@@ -692,7 +723,7 @@ function setMode(m) {
 }
 document.querySelectorAll('.mode').forEach(b => b.onclick = () => setMode(b.dataset.mode));
 $('changeMode').onclick = () => {
-  runId++; try { speechSynthesis.cancel(); } catch {}
+  runId++; playing = false; resetPause(); try { speechSynthesis.cancel(); } catch {}
   $('modePick').hidden = false; $('spread').hidden = true; $('changeMode').hidden = true; $('headHint').textContent = '';
 };
 })();
