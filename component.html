@@ -39,6 +39,7 @@ body { background: var(--paper); color: var(--ink); font-family: var(--f-ui); fo
 .wrap { max-width: 1180px; margin: 0 auto; padding-block: 20px 40px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 18px; }
 header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
 h1 { margin: 0; font-size: 1.35rem; font-weight: 700; letter-spacing: -0.01em; display: flex; align-items: baseline; gap: 10px; }
+#homeTitle { cursor: pointer; }
 h1 .han { font-family: var(--f-han); color: var(--accent); font-size: 1.5rem; }
 .hint { color: var(--ink-soft); font-size: 0.85rem; }
 button, select { font: inherit; color: inherit; }
@@ -144,10 +145,10 @@ textarea { width: 100%; min-height: 180px; border: 1px solid var(--line); border
 
 <div class="wrap">
   <header>
-    <h1><span class="han">笔顺</span> Hanzi Stroke Studio</h1>
+    <h1 id="homeTitle" role="link" tabindex="0" title="Home"><span class="han">笔顺</span> Hanzi Stroke Studio</h1>
     <div class="head-right">
       <span class="hint" id="headHint"></span>
-      <button class="btn" id="changeMode" hidden>Change mode</button>
+      <button class="btn" id="changeMode" hidden title="Back to the start page">⌂ Home</button>
     </div>
   </header>
 
@@ -761,10 +762,14 @@ function setMode(m) {
   store.set(KEY + ':mode', m);
 }
 document.querySelectorAll('.mode').forEach(b => b.onclick = () => setMode(b.dataset.mode));
-$('changeMode').onclick = () => {
+const goHome = () => {
   runId++; playing = false; resetPause(); try { speechSynthesis.cancel(); } catch {}
   $('modePick').hidden = false; $('spread').hidden = true; $('changeMode').hidden = true; $('headHint').textContent = '';
 };
+$('changeMode').onclick = goHome;
+$('homeTitle').onclick = goHome;
+$('homeTitle').onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goHome(); } };
+
 })();
 </script>
 </body></html>
