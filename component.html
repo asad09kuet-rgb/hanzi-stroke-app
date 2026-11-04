@@ -397,11 +397,14 @@ function say(text, rate = 0.85) {
   if (!('speechSynthesis' in window)) return Promise.resolve();
   return new Promise(res => {
     try {
-      speechSynthesis.cancel();
+      if (speechSynthesis.speaking || speechSynthesis.pending) speechSynthesis.cancel();
+      if (speechSynthesis.paused) speechSynthesis.resume();
       const u = new SpeechSynthesisUtterance(text);
       u.lang = 'zh-CN'; u.rate = rate; if (zhVoice) u.voice = zhVoice;
+      window._utterance = u; // keep a reference: Chrome can drop onend for collected utterances
       let done = false; const end = () => { if (!done) { done = true; res(); } };
-      u.onend = end; u.onerror = end; setTimeout(end, 2500);
+      u.onend = end; u.onerror = end;
+      setTimeout(end, Math.min(1500, 500 + 300 * [...text].length)); // never hold up the animation for long
       speechSynthesis.speak(u);
     } catch { res(); }
   });
@@ -537,13 +540,21 @@ async function selectChar(ch, btn, silent = false) {
   strokes = data.strokes; names = data.medians.map(classify);
   $('meta').innerHTML = `<span class="big">${ch}</span> ${escapeHtml(py)} · ${strokes.length} strokes`;
   renderFan(-1);
-  return play(silent);
+  return play(silent, true);
 }
 
 function setNow(name, sub) {
   $('now').innerHTML = name ? `<span class="n1"><span class="zh">${name}</span>${pyOf(name)}</span><span class="n2">${sub}</span>` : '<span class="n1">&nbsp;</span><span class="n2">&nbsp;</span>';
 }
+let fanFor = null;
 function renderFan(active) {
+  // Build the thumbnails once per character; after that only move the highlight (keeps playback smooth).
+  if (fanFor === strokes) {
+    $('fan').querySelectorAll('button').forEach(b => b.classList.toggle('on', +b.dataset.i === active));
+    $('fanWrap').hidden = false;
+    return;
+  }
+  fanFor = strokes;
   const ink = css('--ink'), ghost = css('--ghost'), now = css('--stroke-now');
   $('fan').innerHTML = strokes.map((_, i) => {
     const paths = strokes.map((p, j) => `<path d="${p}" fill="${j < i ? ink : j === i ? now : ghost}"/>`).join('');
@@ -588,35 +599,41 @@ $('pause').onclick = () => setPaused(!paused);
 async function doStep(id, silent = false) {
   if (!writer || stepAt >= strokes.length) return false;
   const i = stepAt++;
-  renderFan(i);
-  setNow(names[i], `Stroke ${i + 1} of ${strokes.length} · ${enOf(names[i])}`);
-  if ($('optTick').checked) tick();
+  const info = `Stroke ${i + 1} of ${strokes.length} · ${enOf(names[i])}`;
   const speak = !silent && $('optName').checked;
   if (speak) {
+    // The stroke name is spoken 1 second before the stroke is drawn.
+    setNow(names[i], `Next: ${info}`);
     say(names[i], 1);
-    await pausableSleep(1000, id); // the stroke name starts 1 second before the stroke is drawn
+    await pausableSleep(1000, id);
     if (id !== runId) return false;
   }
+  // Box, stroke list and label all change together, at the moment the stroke is drawn.
+  renderFan(i);
+  setNow(names[i], info);
+  if ($('optTick').checked) tick();
   await writer.animateStroke(i);
   return id === runId;
 }
-async function play(silent = false) {
+async function play(silent = false, withChar = false) {
   if (!writer) return;
   resetPause();
   const id = ++runId; stepAt = 0;
   playing = true; updatePauseBtn();
-  try { await runStrokes(id, silent); }
+  try { await runStrokes(id, silent, withChar); }
   finally { if (id === runId) { playing = false; resetPause(); updatePauseBtn(); } }
 }
-async function runStrokes(id, silent) {
+async function runStrokes(id, silent, withChar) {
   await writer.hideCharacter({ duration: 0 });
   if (writer._quiz) writer.cancelQuiz();
-  if (!silent && $('optChar').checked) { await say(current, 0.75); if (id !== runId) return; }
+  // The character is spoken when it is picked; the Play button goes straight to the strokes.
+  if (withChar && !silent && $('optChar').checked) { await say(current, 0.75); if (id !== runId) return; }
   while (stepAt < strokes.length) {
     await waitWhilePaused(); if (id !== runId) return;
     const ok = await doStep(id, silent);
     if (id !== runId || !ok) return;
-    await sleep(Math.max(80, 350 / +$('optSpeed').value));
+    // With stroke names on, the 1-second lead before each stroke is the pause; otherwise add a short gap.
+    if (silent || !$('optName').checked) await pausableSleep(Math.max(80, 350 / +$('optSpeed').value), id);
     await waitWhilePaused(); if (id !== runId) return;
   }
   if (id === runId) { seen.add(current); document.querySelectorAll(`.ch[data-ch="${current}"]`).forEach(b => b.classList.add('done')); setNow('', ''); renderFan(-1); $('now').innerHTML = `<span class="n1">Done · ${strokes.length} strokes</span><span class="n2">Press Practice to try writing it yourself</span>`; }
