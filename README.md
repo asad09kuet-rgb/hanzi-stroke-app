@@ -31,6 +31,10 @@ streamlit run app.py
 3. Repository `asad09kuet-rgb/hanzi-stroke-app`, branch `main`, main file `app.py`.
 4. Click **Deploy**.
 
+### Keeping it awake
+
+Free Streamlit apps sleep after about 12 hours without visitors. `.github/workflows/keep-awake.yml` opens the app every 6 hours and clicks the wake-up button if needed. GitHub pauses scheduled jobs in repos with no commits for 60 days; if that happens, re-enable it under the repo's **Actions** tab.
+
 ## Adding exercises
 
 Put a `.txt` file in the `exercises/` folder (UTF-8). One file can hold several exercises:
